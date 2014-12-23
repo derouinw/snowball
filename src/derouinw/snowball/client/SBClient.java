@@ -7,7 +7,8 @@ import derouinw.snowball.server.Message.*;
 public class SBClient {
 
     public static void main(String[] args) {
-        PlayerDataMessage msg;
         System.out.println("Client started");
+
+        ClientFrame cf = new ClientFrame();
     }
 }

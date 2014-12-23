@@ -8,7 +8,7 @@ import java.net.Socket;
  * Main entry point for server
  */
 public class SBServer {
-    final static int PORT = 2000;
+    public final static int PORT = 2000;
     final static int MAX_CONNECTIONS = 100;
 
     private ServerThread st;
