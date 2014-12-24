@@ -27,7 +27,9 @@ public class ClientFrame extends JFrame implements KeyListener {
         pack();
 
         // logic elements
-        nt = new NetworkThread(this);
+        nt = new NetworkThread(this, gp);
+        gp = new GamePanel(this, nt);
+        nt.setGp(gp);
         setStatus("Unconnected");
 
         setVisible(true);
@@ -38,8 +40,8 @@ public class ClientFrame extends JFrame implements KeyListener {
     public void setStatus(String status) {
         statusLabel.setText("Status: " + status);
         if (status.equals("Connected")) {
-            gp = new GamePanel(this);
             add(gp, BorderLayout.CENTER);
+            gp.sendPlayerData();
         }
         revalidate();
         pack();

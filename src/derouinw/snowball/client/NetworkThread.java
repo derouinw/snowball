@@ -1,6 +1,8 @@
 package derouinw.snowball.client;
 
+import derouinw.snowball.client.Game.GamePanel;
 import derouinw.snowball.server.Message.Message;
+import derouinw.snowball.server.Message.PlayerDataMessage;
 import derouinw.snowball.server.Message.StringMessage;
 import derouinw.snowball.server.SBServer;
 
@@ -18,12 +20,14 @@ public class NetworkThread extends Thread {
     private ObjectInputStream receive;
     private ObjectOutputStream send;
     private ClientFrame cf;
+    private GamePanel gp;
 
     private boolean running;
 
-    public NetworkThread(ClientFrame cf) {
+    public NetworkThread(ClientFrame cf, GamePanel gp) {
         super();
         this.cf = cf;
+        this.gp = gp;
     }
 
     public void connect(String host) {
@@ -59,6 +63,11 @@ public class NetworkThread extends Thread {
 
             if (msg instanceof StringMessage) {
                 System.out.println("Received string message: \"" + ((StringMessage) msg).getMessage() + "\"");
+            } else if (msg instanceof PlayerDataMessage) {
+                PlayerDataMessage pdMsg = (PlayerDataMessage)msg;
+                System.out.println("Received player data message: [player: " + pdMsg.getPlayer() + ", x: " + pdMsg.getX() + ", y: " + pdMsg.getY() + "]");
+
+                gp.receive(msg);
             }
         }
     }
@@ -79,5 +88,18 @@ public class NetworkThread extends Thread {
         }
 
         return msg;
+    }
+
+    public void send(Message msg) {
+        try {
+            send.writeObject(msg);
+            send.flush();
+        } catch (IOException e) {
+            System.out.println("IOException: NetworkThread->send");
+        }
+    }
+
+    public void setGp(GamePanel gp) {
+        this.gp = gp;
     }
 }

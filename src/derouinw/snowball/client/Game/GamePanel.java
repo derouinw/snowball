@@ -1,25 +1,32 @@
 package derouinw.snowball.client.Game;
 
-import com.sun.deploy.util.SessionState;
 import derouinw.snowball.client.ClientFrame;
+import derouinw.snowball.client.NetworkThread;
+import derouinw.snowball.server.Message.Message;
+import derouinw.snowball.server.Message.PlayerDataMessage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
 /**
  * Main graphical panel that plays the game
  */
 public class GamePanel extends JPanel implements KeyListener {
     private Player p;
+    private ArrayList<OtherPlayer> otherPlayers = new ArrayList<OtherPlayer>();
     private ClientFrame cf;
+    private NetworkThread nt;
 
-    public GamePanel(ClientFrame cf) {
+    public GamePanel(ClientFrame cf, NetworkThread nt) {
         super();
         setPreferredSize(new Dimension(500, 500));
 
+        this.nt = nt;
         p = new Player();
+        p.addChangeListener(new PlayerListener(this));
         this.cf = cf;
     }
 
@@ -34,6 +41,44 @@ public class GamePanel extends JPanel implements KeyListener {
         g.drawString("Loaded", 10, 10);
 
         g.drawImage(p.getImage(), p.getX(), p.getY(), null);
+        for (int i = 0; i < otherPlayers.size(); i++) {
+            OtherPlayer op = otherPlayers.get(i);
+            g.drawImage(op.getImage(), op.getX(), op.getY(), null);
+        }
+
+    }
+
+    public void receive(Message msg) {
+        if (msg instanceof PlayerDataMessage) {
+            PlayerDataMessage pdMsg = (PlayerDataMessage)msg;
+            boolean newOther = true;
+            int i;
+            for (i = 0; i < otherPlayers.size(); i++) {
+                if (otherPlayers.get(i).getName() == pdMsg.getPlayer()) {
+                    newOther = false;
+                    break;
+                }
+            }
+            if (newOther) {
+                otherPlayers.add(new OtherPlayer(pdMsg.getPlayer(), pdMsg.getX(), pdMsg.getY()));
+            } else {
+                OtherPlayer op = otherPlayers.get(i);
+                op.setName(pdMsg.getPlayer());
+                op.setX(pdMsg.getX());
+                op.setY(pdMsg.getY());
+            }
+            revalidate();
+            repaint();
+        }
+    }
+
+    public void sendPlayerData() {
+        String name = p.getName();
+        int x = p.getX();
+        int y = p.getY();
+
+        PlayerDataMessage pdMsg = new PlayerDataMessage(name, x, y);
+        nt.send(pdMsg);
     }
 
     @Override

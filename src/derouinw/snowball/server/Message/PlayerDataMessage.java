@@ -14,4 +14,8 @@ public class PlayerDataMessage extends Message implements Serializable {
         this.x = x;
         this.y = y;
     }
+
+    public String getPlayer() { return player; }
+    public int getX() { return x; }
+    public int getY() { return y; }
 }
