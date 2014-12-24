@@ -1,9 +1,7 @@
 package derouinw.snowball.server;
 
 import derouinw.snowball.client.Game.Player;
-import derouinw.snowball.server.Message.Message;
-import derouinw.snowball.server.Message.PlayerDataMessage;
-import derouinw.snowball.server.Message.StringMessage;
+import derouinw.snowball.server.Message.*;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -51,18 +49,32 @@ public class ServerThread extends Thread {
         }
     }
 
-    protected void disconnect(int ptNum) {
+    private void broadcast(Message msg) {
         for (int i = 0; i < playerThreads.size(); i++) {
-            if (playerThreads.get(i).getNum() == ptNum) playerThreads.remove(i);
+            playerThreads.get(i).send(msg);
         }
     }
 
-    protected void receive(Message msg, int source) {
-        if (msg instanceof PlayerDataMessage) {
-            PlayerDataMessage pdMsg = (PlayerDataMessage)msg;
+    protected void disconnect(int ptNum) {
+        String user = null;
+        for (int i = 0; i < playerThreads.size(); i++) {
+            if (playerThreads.get(i).getNum() == ptNum) {
+                user = playerThreads.get(i).getPlayer();
+                playerThreads.remove(i);
+            }
+        }
+        if (user != null) {
+            DisconnectMessage dMsg = new DisconnectMessage(user);
+            broadcast(dMsg);
+        } else {
+            System.out.println("oops");
+        }
+    }
 
+    protected void receive(Message msg, String source) {
+        if (msg instanceof PlayerDataMessage) {
             for (int i = 0; i < playerThreads.size(); i++) {
-                if (i != source) playerThreads.get(i).send(msg);
+                if (playerThreads.get(i).getPlayer() != source) playerThreads.get(i).send(msg);
             }
         }
     }
@@ -130,7 +142,10 @@ public class ServerThread extends Thread {
                     x = pdMsg.getX();
                     y = pdMsg.getY();
 
-                    st.receive(msg, ptNum);
+                    st.receive(msg, name);
+                } else if (msg instanceof UsernameMessage) {
+                    UsernameMessage uMsg = (UsernameMessage)msg;
+                    name = uMsg.getUsername();
                 }
             }
         }

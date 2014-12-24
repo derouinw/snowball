@@ -1,9 +1,7 @@
 package derouinw.snowball.client;
 
 import derouinw.snowball.client.Game.GamePanel;
-import derouinw.snowball.server.Message.Message;
-import derouinw.snowball.server.Message.PlayerDataMessage;
-import derouinw.snowball.server.Message.StringMessage;
+import derouinw.snowball.server.Message.*;
 import derouinw.snowball.server.SBServer;
 
 import java.io.EOFException;
@@ -23,6 +21,7 @@ public class NetworkThread extends Thread {
     private GamePanel gp;
 
     private boolean running;
+    private String username;
 
     public NetworkThread(ClientFrame cf, GamePanel gp) {
         super();
@@ -30,7 +29,9 @@ public class NetworkThread extends Thread {
         this.gp = gp;
     }
 
-    public void connect(String host) {
+    public void connect(String host, String username) {
+        this.username = username;
+
         while (!setupConnection(host, SBServer.PORT)) {
             System.out.println("Attempting connection at " + host + ":" + SBServer.PORT);
         }
@@ -58,6 +59,9 @@ public class NetworkThread extends Thread {
         System.out.println("Network thread started");
         running = true;
 
+        UsernameMessage uMsg = new UsernameMessage(username);
+        send(uMsg);
+
         while (running) {
             Message msg = receive();
 
@@ -66,6 +70,11 @@ public class NetworkThread extends Thread {
             } else if (msg instanceof PlayerDataMessage) {
                 PlayerDataMessage pdMsg = (PlayerDataMessage)msg;
                 System.out.println("Received player data message: [player: " + pdMsg.getPlayer() + ", x: " + pdMsg.getX() + ", y: " + pdMsg.getY() + "]");
+
+                gp.receive(msg);
+            } else if (msg instanceof DisconnectMessage) {
+                DisconnectMessage dMsg = (DisconnectMessage)msg;
+                System.out.println("Received disconnect message: " + dMsg.getPlayer());
 
                 gp.receive(msg);
             }

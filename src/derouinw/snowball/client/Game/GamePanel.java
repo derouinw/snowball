@@ -2,6 +2,7 @@ package derouinw.snowball.client.Game;
 
 import derouinw.snowball.client.ClientFrame;
 import derouinw.snowball.client.NetworkThread;
+import derouinw.snowball.server.Message.DisconnectMessage;
 import derouinw.snowball.server.Message.Message;
 import derouinw.snowball.server.Message.PlayerDataMessage;
 
@@ -23,6 +24,8 @@ public class GamePanel extends JPanel implements KeyListener {
     public GamePanel(ClientFrame cf, NetworkThread nt) {
         super();
         setPreferredSize(new Dimension(500, 500));
+        addKeyListener(this);
+        setFocusable(true);
 
         this.nt = nt;
         p = new Player();
@@ -69,8 +72,17 @@ public class GamePanel extends JPanel implements KeyListener {
             }
             revalidate();
             repaint();
+        } else if (msg instanceof DisconnectMessage) {
+            DisconnectMessage dMsg = ((DisconnectMessage) msg);
+            for (int i = 0; i < otherPlayers.size(); i++) {
+                if (dMsg.getPlayer().equals(otherPlayers.get(i).getName())) otherPlayers.remove(i);
+            }
+            revalidate();
+            repaint();
         }
     }
+
+    public void setPlayerName(String name) { p.setName(name); }
 
     public void sendPlayerData() {
         String name = p.getName();

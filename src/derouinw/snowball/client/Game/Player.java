@@ -20,7 +20,7 @@ public class Player extends AbstractPlayer {
 
         x = y = 100;
         speed = 10;
-        name = "Player";
+        name = "You";
 
         sprite = new ImageIcon(SBClient.IMAGES_DIR + "player.png").getImage();
     }
