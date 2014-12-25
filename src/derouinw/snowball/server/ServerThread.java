@@ -190,7 +190,9 @@ public class ServerThread extends Thread {
             } catch (ClassNotFoundException e) {
                 System.out.println("ClassNotFoundException in PlayerThread->receive");
             } catch (IOException e) {
-                System.out.println("IOException in PlayerThread->receive");
+                System.out.println("Player " + ptNum + "Disconnected");
+                running = false;
+                disconnect(ptNum);
             }
 
             return msg;

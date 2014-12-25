@@ -41,12 +41,19 @@ public class ClientFrame extends JFrame implements KeyListener {
             public void actionPerformed(ActionEvent e) {
                 String ip = ipField.getText();
                 String name = userField.getText();
+
+                nt = new NetworkThread(ClientFrame.this, gp);
+                gp = new GamePanel(ClientFrame.this, nt);
+                nt.setGp(gp);
+                nt.setIp(ip);
+                nt.setPlayer(name);
+                nt.start();
                 gp.setPlayerName(name);
 
                 ipField.setEnabled(false);
                 userField.setEnabled(false);
                 connectButton.setEnabled(false);
-                nt.connect(ip, name); // TODO: validate ip and username
+                // TODO: validate ip and username
             }
         });
 
@@ -59,9 +66,6 @@ public class ClientFrame extends JFrame implements KeyListener {
         pack();
 
         // logic elements
-        nt = new NetworkThread(this, gp);
-        gp = new GamePanel(this, nt);
-        nt.setGp(gp);
         setStatus("Unconnected");
 
         setVisible(true);
@@ -75,6 +79,14 @@ public class ClientFrame extends JFrame implements KeyListener {
             userField.setVisible(false);
             connectButton.setVisible(false);
             gp.sendPlayerData();
+        } else if (status.equals("Disconnected")) {
+            remove(gp);
+            ipField.setVisible(true);
+            ipField.setEnabled(true);
+            userField.setVisible(true);
+            userField.setEnabled(true);
+            connectButton.setVisible(true);
+            connectButton.setEnabled(true);
         }
         revalidate();
         pack();
@@ -95,5 +107,9 @@ public class ClientFrame extends JFrame implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         gp.keyReleased(e);
+    }
+
+    public void disconnect() {
+        setStatus("Disconnected");
     }
 }

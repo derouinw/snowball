@@ -24,11 +24,17 @@ public class NetworkThread extends Thread {
     private boolean running;
     private String username;
 
+    private String ip;
+    private String player;
+
     public NetworkThread(ClientFrame cf, GamePanel gp) {
         super();
         this.cf = cf;
         this.gp = gp;
     }
+
+    public void setIp(String ip) { this.ip = ip; }
+    public void setPlayer(String player) { this.player = player; }
 
     public void connect(String host, String username) {
         this.username = username;
@@ -37,7 +43,6 @@ public class NetworkThread extends Thread {
             System.out.println("Attempting connection at " + host + ":" + SBServer.PORT);
         }
         cf.setStatus("Connected");
-        start();
     }
 
     private boolean setupConnection(String host, int port) {
@@ -57,6 +62,7 @@ public class NetworkThread extends Thread {
     }
 
     public void run() {
+        connect(ip, player);
         System.out.println("Network thread started");
         running = true;
 
@@ -99,7 +105,13 @@ public class NetworkThread extends Thread {
         } catch (ClassNotFoundException e) {
             System.out.println("ClassNotFoundException in PlayerThread->receive");
         } catch (IOException e) {
-            System.out.println("IOException in PlayerThread->receive");
+            System.out.println("Disconnected");
+            running = false;
+            cf.disconnect();
+        } catch (ClassCastException cce) {
+            System.out.println("Disconnected");
+            running = false;
+            cf.disconnect();
         }
 
         return msg;
