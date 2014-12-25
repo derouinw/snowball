@@ -1,6 +1,7 @@
 package derouinw.snowball.client;
 
 import derouinw.snowball.client.Game.GamePanel;
+import derouinw.snowball.client.Map.Map;
 import derouinw.snowball.server.Message.*;
 import derouinw.snowball.server.SBServer;
 
@@ -75,6 +76,12 @@ public class NetworkThread extends Thread {
             } else if (msg instanceof DisconnectMessage) {
                 DisconnectMessage dMsg = (DisconnectMessage)msg;
                 System.out.println("Received disconnect message: " + dMsg.getPlayer());
+
+                gp.receive(msg);
+            } else if (msg instanceof MapDataMessage) {
+                MapDataMessage mdMsg = (MapDataMessage)msg;
+                System.out.println(mdMsg.getMap().getTile(0,0).getType());
+                System.out.println("Received map data message");
 
                 gp.receive(msg);
             }

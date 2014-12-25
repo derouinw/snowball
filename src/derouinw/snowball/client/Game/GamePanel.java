@@ -1,8 +1,11 @@
 package derouinw.snowball.client.Game;
 
 import derouinw.snowball.client.ClientFrame;
+import derouinw.snowball.client.Map.Map;
+import derouinw.snowball.client.Map.MapTile;
 import derouinw.snowball.client.NetworkThread;
 import derouinw.snowball.server.Message.DisconnectMessage;
+import derouinw.snowball.server.Message.MapDataMessage;
 import derouinw.snowball.server.Message.Message;
 import derouinw.snowball.server.Message.PlayerDataMessage;
 
@@ -16,10 +19,13 @@ import java.util.ArrayList;
  * Main graphical panel that plays the game
  */
 public class GamePanel extends JPanel implements KeyListener {
-    private Player p;
-    private ArrayList<OtherPlayer> otherPlayers = new ArrayList<OtherPlayer>();
     private ClientFrame cf;
     private NetworkThread nt;
+
+    private Player p;
+    private ArrayList<OtherPlayer> otherPlayers = new ArrayList<OtherPlayer>();
+
+    private Map m;
 
     public GamePanel(ClientFrame cf, NetworkThread nt) {
         super();
@@ -27,10 +33,13 @@ public class GamePanel extends JPanel implements KeyListener {
         addKeyListener(this);
         setFocusable(true);
 
+        this.cf = cf;
         this.nt = nt;
+
         p = new Player();
         p.addChangeListener(new PlayerListener(this));
-        this.cf = cf;
+
+        m = new Map();
     }
 
     public void paintComponent(Graphics g) {
@@ -40,8 +49,7 @@ public class GamePanel extends JPanel implements KeyListener {
         g.setColor(Color.WHITE);
         g.drawRect(0,0,width,height);
 
-        g.setColor(Color.BLACK);
-        g.drawString("Loaded", 10, 10);
+        m.drawMap(g);
 
         g.drawImage(p.getImage(), p.getX(), p.getY(), null);
         for (int i = 0; i < otherPlayers.size(); i++) {
@@ -79,10 +87,32 @@ public class GamePanel extends JPanel implements KeyListener {
             }
             revalidate();
             repaint();
+        } else if (msg instanceof MapDataMessage) {
+            MapDataMessage mdMsg = (MapDataMessage)msg;
+            loadMap(mdMsg.getMap());
+            revalidate();
+            repaint();
         }
     }
 
     public void setPlayerName(String name) { p.setName(name); }
+
+    // MapTile images are transient, so they have to be loaded again
+    private void loadMap(Map m) {
+        this.m = m;
+
+        int sizeY = this.m.getSizeY();
+        int sizeX = this.m.getSizeX();
+
+        for (int y = 0; y < sizeY; y++) {
+            for (int x = 0; x < sizeX; x++) {
+                MapTile tile = this.m.getTile(x, y);
+                tile.loadImage();
+            }
+        }
+
+        //System.out.println(m.getTile(0,0).getType());
+    }
 
     public void sendPlayerData() {
         String name = p.getName();

@@ -1,6 +1,8 @@
 package derouinw.snowball.server;
 
-import derouinw.snowball.client.Game.Player;
+import derouinw.snowball.client.Map.Map;
+import derouinw.snowball.client.Map.MapTile;
+import derouinw.snowball.client.Map.TileType;
 import derouinw.snowball.server.Message.*;
 
 import java.io.EOFException;
@@ -18,9 +20,15 @@ public class ServerThread extends Thread {
     private ArrayList<PlayerThread> playerThreads;
     private boolean running;
 
+    private Map m;
+
     public ServerThread() {
         playerThreads = new ArrayList<PlayerThread>();
+
+        m = new Map(15, 15);
     }
+
+    protected synchronized Map getMap() { return m; }
 
     public void run() {
         System.out.println("Server thread started");
@@ -53,6 +61,11 @@ public class ServerThread extends Thread {
         for (int i = 0; i < playerThreads.size(); i++) {
             playerThreads.get(i).send(msg);
         }
+    }
+
+    protected void sendUpdatedMap() {
+        MapDataMessage mdMsg = new MapDataMessage(getMap());
+        broadcast(mdMsg);
     }
 
     protected void disconnect(int ptNum) {
@@ -129,6 +142,9 @@ public class ServerThread extends Thread {
             System.out.println("Player thread started");
             running = true;
 
+            MapDataMessage mdMsg = new MapDataMessage(getMap());
+            send(mdMsg);
+
             while (running) {
                 Message msg = receive();
 
@@ -141,6 +157,13 @@ public class ServerThread extends Thread {
                     name = pdMsg.getPlayer();
                     x = pdMsg.getX();
                     y = pdMsg.getY();
+
+                    int tX = x / MapTile.TILE_SIZE;
+                    int tY = y / MapTile.TILE_SIZE;
+
+                    getMap().getTile(tX, tY).setType(TileType.Grass);
+                    System.out.println(getMap().getTile(0,0).getType());
+                    sendUpdatedMap();
 
                     st.receive(msg, name);
                 } else if (msg instanceof UsernameMessage) {
