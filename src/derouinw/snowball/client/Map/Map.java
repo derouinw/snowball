@@ -1,6 +1,9 @@
 package derouinw.snowball.client.Map;
 
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 
 /**
@@ -9,6 +12,7 @@ import java.io.Serializable;
 public class Map implements Serializable {
     static final int DEFAULT_X = 10;
     static final int DEFAULT_Y = 10;
+    public static final String MAPS_DIR = "./maps/";
 
     private int sizeX, sizeY;
     private MapTile[][] tiles;

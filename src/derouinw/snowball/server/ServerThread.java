@@ -5,10 +5,7 @@ import derouinw.snowball.client.Map.MapTile;
 import derouinw.snowball.client.Map.TileType;
 import derouinw.snowball.server.Message.*;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -25,7 +22,20 @@ public class ServerThread extends Thread {
     public ServerThread() {
         playerThreads = new ArrayList<PlayerThread>();
 
-        m = new Map(15, 15);
+        String filename = Map.MAPS_DIR + "default.map";
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fis);
+            m = (Map)in.readObject();
+            in.close();
+            fis.close();
+        } catch (IOException ioe) {
+            System.out.println("IOException in ServerThread->ServerThread");
+            m = new Map();
+        } catch (ClassNotFoundException e) {
+            System.out.println("ClassNotFoundException in ServerThread->ServerThread");
+            m = new Map();
+        }
     }
 
     protected synchronized Map getMap() { return m; }
@@ -157,13 +167,6 @@ public class ServerThread extends Thread {
                     name = pdMsg.getPlayer();
                     x = pdMsg.getX();
                     y = pdMsg.getY();
-
-                    int tX = x / MapTile.TILE_SIZE;
-                    int tY = y / MapTile.TILE_SIZE;
-
-                    getMap().getTile(tX, tY).setType(TileType.Grass);
-                    System.out.println(getMap().getTile(0,0).getType());
-                    sendUpdatedMap();
 
                     st.receive(msg, name);
                 } else if (msg instanceof UsernameMessage) {

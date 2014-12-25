@@ -38,6 +38,7 @@ public class MapTile implements Serializable {
 
     public void setType(TileType type) {
         this.type = type;
+        loadImage();
     }
 
     public void loadImage() {

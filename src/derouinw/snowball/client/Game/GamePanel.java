@@ -110,8 +110,6 @@ public class GamePanel extends JPanel implements KeyListener {
                 tile.loadImage();
             }
         }
-
-        //System.out.println(m.getTile(0,0).getType());
     }
 
     public void sendPlayerData() {

@@ -80,7 +80,6 @@ public class NetworkThread extends Thread {
                 gp.receive(msg);
             } else if (msg instanceof MapDataMessage) {
                 MapDataMessage mdMsg = (MapDataMessage)msg;
-                System.out.println(mdMsg.getMap().getTile(0,0).getType());
                 System.out.println("Received map data message");
 
                 gp.receive(msg);
