@@ -121,6 +121,10 @@ public class GamePanel extends JPanel implements KeyListener {
         nt.send(pdMsg);
     }
 
+    public void disconnect() {
+        nt.disconnect(false);
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
 

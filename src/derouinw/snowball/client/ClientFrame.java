@@ -110,6 +110,11 @@ public class ClientFrame extends JFrame implements KeyListener {
     }
 
     public void disconnect() {
+        gp.disconnect();
         setStatus("Disconnected");
+    }
+
+    public void reconnect() {
+        connectButton.doClick();
     }
 }

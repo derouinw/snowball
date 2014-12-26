@@ -51,19 +51,13 @@ public class ServerThread extends Thread {
 
     public void addConnection(Socket s) {
         playerThreads.add(new PlayerThread(s, playerThreads.size(), this));
+    }
 
+    protected void sendPlayerData(int ptNum) {
         for (int i = 0; i < playerThreads.size()-1; i++) {
             PlayerThread pt = playerThreads.get(i);
             PlayerDataMessage pdMsg = new PlayerDataMessage(pt.getPlayer(), pt.getX(), pt.getY());
-            playerThreads.get(playerThreads.size()-1).send(pdMsg);
-        }
-    }
-
-    private void broadcast(String message) {
-        Message msg = new StringMessage("server", message);
-
-        for (int i = 0; i < playerThreads.size(); i++) {
-            playerThreads.get(i).send(msg);
+            playerThreads.get(ptNum).send(pdMsg);
         }
     }
 
@@ -71,11 +65,6 @@ public class ServerThread extends Thread {
         for (int i = 0; i < playerThreads.size(); i++) {
             playerThreads.get(i).send(msg);
         }
-    }
-
-    protected void sendUpdatedMap() {
-        MapDataMessage mdMsg = new MapDataMessage(getMap());
-        broadcast(mdMsg);
     }
 
     protected void disconnect(int ptNum) {
@@ -106,6 +95,7 @@ public class ServerThread extends Thread {
         private ObjectInputStream receive;
         private ObjectOutputStream send;
         private boolean running;
+        private boolean connected = false;
 
         private int ptNum;
         private ServerThread st;
@@ -152,8 +142,18 @@ public class ServerThread extends Thread {
             System.out.println("Player thread started");
             running = true;
 
+            while (!connected) {
+                Message msg = receive();
+                if (msg instanceof ConnectMessage) {
+                    name = ((ConnectMessage) msg).getPlayer();
+                    connected = true;
+                    send(msg);
+                }
+            }
+
             MapDataMessage mdMsg = new MapDataMessage(getMap());
             send(mdMsg);
+            sendPlayerData(ptNum);
 
             while (running) {
                 Message msg = receive();

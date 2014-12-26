@@ -22,6 +22,7 @@ public class NetworkThread extends Thread {
     private GamePanel gp;
 
     private boolean running;
+    private boolean connected;
     private String username;
 
     private String ip;
@@ -31,6 +32,7 @@ public class NetworkThread extends Thread {
         super();
         this.cf = cf;
         this.gp = gp;
+        connected = false;
     }
 
     public void setIp(String ip) { this.ip = ip; }
@@ -66,6 +68,22 @@ public class NetworkThread extends Thread {
         System.out.println("Network thread started");
         running = true;
 
+        while (!connected) {
+            Message sendMsg = new ConnectMessage(player);
+            send(sendMsg);
+
+            try {
+                sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Message msg = receive();
+            if (msg instanceof ConnectMessage) {
+                if (((ConnectMessage)msg).getPlayer().equals(player)) connected = true;
+            }
+        }
+
         UsernameMessage uMsg = new UsernameMessage(username);
         send(uMsg);
 
@@ -99,19 +117,19 @@ public class NetworkThread extends Thread {
         try {
             msg = (Message) receive.readObject();
         } catch (EOFException eofe) {
-            System.out.println("EOFException in PlayerThread->receive");
+           disconnect();
         } catch (SocketTimeoutException ste) {
             return null; /* Timeout, its k */
         } catch (ClassNotFoundException e) {
             System.out.println("ClassNotFoundException in PlayerThread->receive");
         } catch (IOException e) {
-            System.out.println("Disconnected");
-            running = false;
-            cf.disconnect();
+            disconnect();
+            cf.reconnect();
         } catch (ClassCastException cce) {
-            System.out.println("Disconnected");
-            running = false;
-            cf.disconnect();
+            disconnect();
+            cf.reconnect();
+        } catch (NullPointerException npe) {
+            System.out.println("NullPointerException in PlayerThread->receive");
         }
 
         return msg;
@@ -128,5 +146,17 @@ public class NetworkThread extends Thread {
 
     public void setGp(GamePanel gp) {
         this.gp = gp;
+    }
+
+    public void disconnect() {
+        System.out.println("Disconnected");
+        running = false;
+        cf.disconnect();
+    }
+
+    public void disconnect(boolean sendUp) {
+        System.out.println("Disconnected");
+        running = false;
+        if (sendUp) cf.disconnect();
     }
 }
