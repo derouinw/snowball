@@ -2,6 +2,7 @@ package derouinw.snowball.client;
 
 import derouinw.snowball.client.Game.GamePanel;
 import derouinw.snowball.client.Item.InventoryPanel;
+import derouinw.snowball.client.Map.MapTile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,8 +48,6 @@ public class ClientFrame extends JFrame implements KeyListener {
                 String ip = ipField.getText();
                 String name = userField.getText();
 
-                nt = new NetworkThread(ClientFrame.this, gp);
-                gp = new GamePanel(ClientFrame.this, nt);
                 nt.setGp(gp);
                 nt.setIp(ip);
                 nt.setPlayer(name);
@@ -70,8 +69,11 @@ public class ClientFrame extends JFrame implements KeyListener {
         actionsPanel = new JPanel();
         actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.Y_AXIS));
         actionsPanel.setFocusable(false);
+        actionsPanel.setPreferredSize(new Dimension(InventoryPanel.WIDTH * MapTile.TILE_SIZE, 500));
         inventoryButton = new JButton("Show Inventory");
         inventoryButton.setFocusable(false);
+        nt = new NetworkThread(ClientFrame.this, gp);
+        gp = new GamePanel(ClientFrame.this, nt);
         inventoryPanel = new InventoryPanel(gp);
         inventoryButton.addActionListener(new ActionListener() {
             @Override
@@ -80,22 +82,18 @@ public class ClientFrame extends JFrame implements KeyListener {
                     // panel is showing, remove it
                     actionsPanel.remove(inventoryPanel);
                     inventoryButton.setText("Show Inventory");
-                    pack();
                     revalidate();
                     repaint();
                 } else {
                     // panel isn't showing, add it
-                    actionsPanel.add(inventoryPanel,1);
+                    actionsPanel.add(inventoryPanel, 1);
                     inventoryButton.setText("Hide Inventory");
-                    pack();
                     revalidate();
                     repaint();
                 }
             }
         });
         actionsPanel.add(inventoryButton);
-        //actionsPanel.add(Box.createGlue());
-        //actionsPanel.add(Box.createHorizontalGlue());
 
         add(statusPanel, BorderLayout.NORTH);
         pack();
