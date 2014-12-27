@@ -19,6 +19,8 @@ public class ItemLabel extends JLabel implements MouseListener {
         addMouseListener(this);
     }
 
+    public void setItem(Item item) { this.item = item; }
+
     public Image getSprite() { return (item == null) ? blankItem : item.getSprite(); }
 
     @Override

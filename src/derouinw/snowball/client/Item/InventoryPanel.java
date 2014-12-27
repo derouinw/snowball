@@ -20,7 +20,6 @@ public class InventoryPanel extends JPanel {
         super();
 
         this.gp = gp;
-        gp.setInventoryPanel(this);
 
         setLayout(new GridLayout(HEIGHT, WIDTH));
         labels = new ItemLabel[HEIGHT][];
@@ -33,6 +32,8 @@ public class InventoryPanel extends JPanel {
         }
 
         setSize(new Dimension(WIDTH * MapTile.TILE_SIZE, HEIGHT * MapTile.TILE_SIZE));
+
+        gp.setInventoryPanel(this);
     }
 
     public void setInventory(Inventory inv) { this.inv = inv; }
@@ -41,6 +42,14 @@ public class InventoryPanel extends JPanel {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 g.drawImage(labels[y][x].getSprite(), x * MapTile.TILE_SIZE, y * MapTile.TILE_SIZE, null);
+            }
+        }
+    }
+
+    public void updateLabels() {
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                labels[y][x].setItem(inv.getItem(y*WIDTH + x));
             }
         }
     }

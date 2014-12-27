@@ -7,6 +7,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.event.KeyEvent;
 
 import derouinw.snowball.client.Item.Inventory;
+import derouinw.snowball.client.Item.Item;
 import derouinw.snowball.client.SBClient;
 
 /**
@@ -52,6 +53,10 @@ public class Player extends AbstractPlayer {
         listenerList.add(ChangeListener.class, cl);
     }
 
+    public void addItem(Item item) {
+        inventory.addItem(item);
+    }
+
     protected void fireStateChanged() {
         Object[] listeners = listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -=2 ) {
@@ -61,4 +66,6 @@ public class Player extends AbstractPlayer {
             }
         }
     }
+
+    public Inventory getInventory() { return inventory; }
 }

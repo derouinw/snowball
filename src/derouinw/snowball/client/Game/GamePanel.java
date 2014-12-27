@@ -1,7 +1,9 @@
 package derouinw.snowball.client.Game;
 
 import derouinw.snowball.client.ClientFrame;
+import derouinw.snowball.client.Item.InventoryListener;
 import derouinw.snowball.client.Item.InventoryPanel;
+import derouinw.snowball.client.Item.Item;
 import derouinw.snowball.client.Map.Map;
 import derouinw.snowball.client.Map.MapTile;
 import derouinw.snowball.client.NetworkThread;
@@ -98,7 +100,12 @@ public class GamePanel extends JPanel implements KeyListener {
     }
 
     public void setPlayerName(String name) { p.setName(name); }
-    public void setInventoryPanel(InventoryPanel ip) { this.ip = ip; }
+    public void setInventoryPanel(InventoryPanel ip) {
+        this.ip = ip;
+        p.getInventory().addChangeListener(new InventoryListener(ip));
+        ip.setInventory(p.getInventory());
+        p.addItem(new Item("sword"));
+    }
 
     // MapTile images are transient, so they have to be loaded again
     private void loadMap(Map m) {
