@@ -10,7 +10,7 @@ import java.io.Serializable;
  * A single map tile
  */
 public class MapTile implements Serializable {
-    public static final int TILE_SIZE = 50;
+    public static final int TILE_SIZE = 64;
 
     private TileType type;
     private int x, y;
