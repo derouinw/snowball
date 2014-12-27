@@ -8,9 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  * Main window for Builder
@@ -22,8 +20,14 @@ public class BuilderFrame extends JFrame {
     private MapComponent mc;
 
     private JPanel optionsPanel;
+
     private JTextField mapNameField;
     private JButton saveButton;
+    private JButton loadButton;
+
+    private JTextField sizeXField;
+    private JTextField sizeYField;
+    private JButton newMapButton;
 
     private int selected;
 
@@ -47,7 +51,7 @@ public class BuilderFrame extends JFrame {
         mc = new MapComponent(this);
 
         optionsPanel = new JPanel();
-        optionsPanel.setLayout(new FlowLayout());
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         mapNameField = new JTextField(20);
         saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
@@ -56,8 +60,35 @@ public class BuilderFrame extends JFrame {
                 saveMap(mc.getMap());
             }
         });
+        loadButton = new JButton("Load");
+        loadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadMap("maps/" + mapNameField.getText());
+            }
+        });
+        sizeXField = new JTextField(10);
+        sizeXField.setText("Columns");
+        sizeYField = new JTextField(10);
+        sizeYField.setText("Rows");
+        newMapButton = new JButton("New Map");
+        newMapButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int sizeX = Integer.valueOf(sizeXField.getText());
+                int sizeY = Integer.valueOf(sizeYField.getText());
+                mc.setMap(new Map(sizeX, sizeY));
+                revalidate();
+                repaint();
+            }
+        });
         optionsPanel.add(mapNameField);
         optionsPanel.add(saveButton);
+        optionsPanel.add(loadButton);
+        optionsPanel.add(sizeXField);
+        optionsPanel.add(sizeYField);
+        optionsPanel.add(newMapButton);
+        optionsPanel.add(Box.createVerticalGlue());
 
         add(choicePanel, BorderLayout.WEST);
         add(mc, BorderLayout.CENTER);
@@ -68,8 +99,10 @@ public class BuilderFrame extends JFrame {
         setSelected(0);
     }
 
+
+
     private void saveMap(Map map) {
-        String filename = Map.MAPS_DIR + mapNameField.getText();
+        String filename = "maps/" + mapNameField.getText();
         try {
             FileOutputStream fos = new FileOutputStream(filename);
             ObjectOutputStream out = new ObjectOutputStream(fos);
@@ -79,6 +112,28 @@ public class BuilderFrame extends JFrame {
         } catch (IOException ioe) {
             System.out.println("IOException in BuilderFrame->saveMap");
         }
+    }
+
+    private void loadMap(String filename) {
+        System.out.println("Loading map: " + filename);
+        Map m;
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fis);
+            m = (Map)in.readObject();
+            in.close();
+            fis.close();
+        } catch (IOException ioe) {
+            System.out.println("IOException in BuilderFrame->loadMap");
+            m = new Map();
+        } catch (ClassNotFoundException e) {
+            System.out.println("ClassNotFoundException in BuilderFrame->loadMap");
+            m = new Map();
+        }
+
+        mc.setMap(m);
+        revalidate();
+        repaint();
     }
 
     public void setSelected(int s) {

@@ -42,13 +42,6 @@ public class MapTile implements Serializable {
     }
 
     public void loadImage() {
-        switch (type) {
-            case Dirt:
-                sprite = new ImageIcon(SBClient.IMAGES_DIR + "dirt.png").getImage();
-                break;
-            case Grass:
-                sprite = new ImageIcon(SBClient.IMAGES_DIR + "grass.png").getImage();
-                break;
-        }
+        sprite = new ImageIcon(SBClient.IMAGES_DIR + type.toString().toLowerCase() + ".png").getImage();
     }
 }
