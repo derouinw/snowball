@@ -21,6 +21,8 @@ public class BuilderFrame extends JFrame {
 
     private JPanel optionsPanel;
 
+    private JButton showItemEditorButton;
+
     private JTextField mapNameField;
     private JButton saveButton;
     private JButton loadButton;
@@ -28,6 +30,8 @@ public class BuilderFrame extends JFrame {
     private JTextField sizeXField;
     private JTextField sizeYField;
     private JButton newMapButton;
+
+    private ItemEditor itemEditor;
 
     private int selected;
 
@@ -52,6 +56,15 @@ public class BuilderFrame extends JFrame {
 
         optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+
+        showItemEditorButton = new JButton("Show item editor");
+        showItemEditorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                itemEditor.setVisible(true);
+            }
+        });
+
         mapNameField = new JTextField(20);
         saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
@@ -82,6 +95,8 @@ public class BuilderFrame extends JFrame {
                 repaint();
             }
         });
+
+        optionsPanel.add(showItemEditorButton);
         optionsPanel.add(mapNameField);
         optionsPanel.add(saveButton);
         optionsPanel.add(loadButton);
@@ -95,6 +110,8 @@ public class BuilderFrame extends JFrame {
         add(optionsPanel, BorderLayout.EAST);
 
         setVisible(true);
+
+        itemEditor = new ItemEditor();
 
         setSelected(0);
     }
