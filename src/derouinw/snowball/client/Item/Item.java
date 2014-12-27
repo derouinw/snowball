@@ -16,6 +16,7 @@ public class Item {
         id = numItems++;
     }
 
+    public int getId() { return id; }
     public String getName() { return name; }
     public Image getSprite() { return sprite; }
 }

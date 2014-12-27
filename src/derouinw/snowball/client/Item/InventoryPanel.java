@@ -10,7 +10,7 @@ import java.awt.*;
  * Shows an inventory on screen
  */
 public class InventoryPanel extends JPanel {
-    private static final int WIDTH = 6, HEIGHT = 5;
+    public static final int WIDTH = 6, HEIGHT = 5;
     private Inventory inv;
     private GamePanel gp;
 
@@ -20,6 +20,7 @@ public class InventoryPanel extends JPanel {
         super();
 
         this.gp = gp;
+        gp.setInventoryPanel(this);
 
         setLayout(new GridLayout(HEIGHT, WIDTH));
         labels = new ItemLabel[HEIGHT][];
