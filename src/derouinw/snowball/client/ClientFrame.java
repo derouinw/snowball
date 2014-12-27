@@ -1,6 +1,7 @@
 package derouinw.snowball.client;
 
 import derouinw.snowball.client.Game.GamePanel;
+import derouinw.snowball.client.Item.InventoryPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +22,10 @@ public class ClientFrame extends JFrame implements KeyListener {
 
     private NetworkThread nt;
     private GamePanel gp;
+
+    private JPanel actionsPanel;
+    private JButton inventoryButton;
+    private InventoryPanel inventoryPanel;
 
     public ClientFrame() {
         super("Snowball");
@@ -62,6 +67,36 @@ public class ClientFrame extends JFrame implements KeyListener {
         statusPanel.add(userField);
         statusPanel.add(connectButton);
 
+        actionsPanel = new JPanel();
+        actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.Y_AXIS));
+        actionsPanel.setFocusable(false);
+        inventoryButton = new JButton("Show Inventory");
+        inventoryButton.setFocusable(false);
+        inventoryPanel = new InventoryPanel(gp);
+        inventoryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (inventoryPanel.getParent() == actionsPanel) {
+                    // panel is showing, remove it
+                    actionsPanel.remove(inventoryPanel);
+                    inventoryButton.setText("Show Inventory");
+                    pack();
+                    revalidate();
+                    repaint();
+                } else {
+                    // panel isn't showing, add it
+                    actionsPanel.add(inventoryPanel,1);
+                    inventoryButton.setText("Hide Inventory");
+                    pack();
+                    revalidate();
+                    repaint();
+                }
+            }
+        });
+        actionsPanel.add(inventoryButton);
+        //actionsPanel.add(Box.createGlue());
+        //actionsPanel.add(Box.createHorizontalGlue());
+
         add(statusPanel, BorderLayout.NORTH);
         pack();
 
@@ -75,12 +110,14 @@ public class ClientFrame extends JFrame implements KeyListener {
         statusLabel.setText("Status: " + status);
         if (status.equals("Connected")) {
             add(gp, BorderLayout.CENTER);
+            add(actionsPanel, BorderLayout.EAST);
             ipField.setVisible(false);
             userField.setVisible(false);
             connectButton.setVisible(false);
             gp.sendPlayerData();
         } else if (status.equals("Disconnected")) {
             remove(gp);
+            remove(actionsPanel);
             ipField.setVisible(true);
             ipField.setEnabled(true);
             userField.setVisible(true);

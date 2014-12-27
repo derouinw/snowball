@@ -6,6 +6,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.event.KeyEvent;
 
+import derouinw.snowball.client.Item.Inventory;
 import derouinw.snowball.client.SBClient;
 
 /**
@@ -15,6 +16,8 @@ public class Player extends AbstractPlayer {
     private int speed;
     private EventListenerList listenerList = new EventListenerList();
 
+    private Inventory inventory;
+
     public Player() {
         super();
 
@@ -23,6 +26,8 @@ public class Player extends AbstractPlayer {
         name = "You";
 
         sprite = new ImageIcon(SBClient.IMAGES_DIR + "player.png").getImage();
+
+        inventory = new Inventory();
     }
 
     public void keyPressed(KeyEvent e) {
