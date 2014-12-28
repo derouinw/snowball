@@ -1,13 +1,10 @@
 package derouinw.snowball.server;
 
 import derouinw.snowball.client.Map.Map;
-import derouinw.snowball.client.Map.MapTile;
-import derouinw.snowball.client.Map.TileType;
 import derouinw.snowball.server.Message.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
 /**
@@ -15,12 +12,14 @@ import java.util.ArrayList;
  */
 public class ServerThread extends Thread {
     private ArrayList<PlayerThread> playerThreads;
+    private ArrayList<Room> rooms;
     private boolean running;
 
     private Map m;
 
     public ServerThread() {
         playerThreads = new ArrayList<PlayerThread>();
+        rooms = new ArrayList<Room>();
 
         String filename = Map.MAPS_DIR + "default.map";
         try {
@@ -36,6 +35,8 @@ public class ServerThread extends Thread {
             System.out.println("ClassNotFoundException in ServerThread->ServerThread");
             m = new Map();
         }
+
+        rooms.add(new Room(m, this));
     }
 
     protected synchronized Map getMap() { return m; }
@@ -50,7 +51,9 @@ public class ServerThread extends Thread {
     }
 
     public void addConnection(Socket s) {
-        playerThreads.add(new PlayerThread(s, playerThreads.size(), this));
+        PlayerThread pt = new PlayerThread(s, playerThreads.size(), this);
+        playerThreads.add(pt);
+        rooms.get(0).addPlayerThread(pt);
     }
 
     protected void sendPlayerData(int ptNum) {
@@ -83,119 +86,20 @@ public class ServerThread extends Thread {
         }
     }
 
-    protected void receive(Message msg, String source) {
+    private PlayerThread getPlayerThread(String player) {
+        for (int i = 0; i < playerThreads.size(); i++) {
+            if (playerThreads.get(i).getPlayer().equals(player)) return playerThreads.get(i);
+        }
+        return null;
+    }
+
+    public void receive(Message msg, String source) {
         if (msg instanceof PlayerDataMessage) {
             for (int i = 0; i < playerThreads.size(); i++) {
                 if (playerThreads.get(i).getPlayer() != source) playerThreads.get(i).send(msg);
             }
-        }
-    }
-
-    class PlayerThread extends Thread {
-        private ObjectInputStream receive;
-        private ObjectOutputStream send;
-        private boolean running;
-        private boolean connected = false;
-
-        private int ptNum;
-        private ServerThread st;
-
-        // player data
-        String name = "";
-        int x = 0, y = 0;
-
-        public String getPlayer() { return name; }
-        public int getX() { return x; }
-        public int getY() { return y; }
-
-        public PlayerThread(Socket s, int num, ServerThread st) {
-            this.ptNum = num;
-            this.st = st;
-
-            try {
-                s.setSoTimeout(1000);
-                send = new ObjectOutputStream(s.getOutputStream());
-                receive = new ObjectInputStream(s.getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            start();
-        }
-
-        public int getNum() { return ptNum; }
-
-        public boolean send(Message message) {
-            try {
-                send.writeObject(message);
-                send.flush();
-            } catch (IOException e) {
-                System.out.println("Player " + ptNum + " disconnected");
-                running = false;
-                disconnect(ptNum);
-            }
-
-            return true;
-        }
-
-        public void run() {
-            System.out.println("Player thread started");
-            running = true;
-
-            while (!connected) {
-                Message msg = receive();
-                if (msg instanceof ConnectMessage) {
-                    name = ((ConnectMessage) msg).getPlayer();
-                    connected = true;
-                    send(msg);
-                }
-            }
-
-            MapDataMessage mdMsg = new MapDataMessage(getMap());
-            send(mdMsg);
-            sendPlayerData(ptNum);
-
-            while (running) {
-                Message msg = receive();
-
-                if (msg instanceof StringMessage) {
-                    System.out.println("Received string message: \"" + ((StringMessage) msg).getMessage() + "\"");
-                } else if (msg instanceof PlayerDataMessage) {
-                    PlayerDataMessage pdMsg = (PlayerDataMessage)msg;
-                    System.out.println("Received player data message: [player: " + pdMsg.getPlayer() + ", x: " + pdMsg.getX() + ", y: " + pdMsg.getY() + "]");
-
-                    name = pdMsg.getPlayer();
-                    x = pdMsg.getX();
-                    y = pdMsg.getY();
-
-                    st.receive(msg, name);
-                } else if (msg instanceof UsernameMessage) {
-                    UsernameMessage uMsg = (UsernameMessage)msg;
-                    name = uMsg.getUsername();
-                }
-            }
-        }
-
-        private Message receive() {
-            Message msg = null;
-
-            try {
-                msg = (Message) receive.readObject();
-            } catch (EOFException eofe) {
-                System.out.println("Player " + ptNum + " disconnected");
-                running = false;
-                disconnect(ptNum);
-            } catch (SocketTimeoutException ste) {
-                return null; /* Timeout, its k */
-            } catch (ClassNotFoundException e) {
-                System.out.println("ClassNotFoundException in PlayerThread->receive");
-            } catch (IOException e) {
-                System.out.println("Player " + ptNum + "Disconnected");
-                running = false;
-                disconnect(ptNum);
-            }
-
-            return msg;
+        } else if (msg instanceof ConnectMessage) {
+            getPlayerThread(source).setRoom(rooms.get(0));
         }
     }
 }
