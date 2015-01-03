@@ -1,7 +1,6 @@
 package derouinw.snowball.client;
 
 import derouinw.snowball.client.Game.GamePanel;
-import derouinw.snowball.client.Map.Map;
 import derouinw.snowball.server.Message.*;
 import derouinw.snowball.server.SBServer;
 
@@ -37,6 +36,11 @@ public class NetworkThread extends Thread {
 
     public void setIp(String ip) { this.ip = ip; }
     public void setPlayer(String player) { this.player = player; }
+    public void setGp(GamePanel gp) {
+        this.gp = gp;
+    }
+
+    public String getPlayer() { return player; }
 
     public void connect(String host, String username) {
         this.username = username;
@@ -107,6 +111,11 @@ public class NetworkThread extends Thread {
                 System.out.println("Received map data message");
 
                 gp.receive(msg);
+            } else if (msg instanceof ChatMessage) {
+                ChatMessage cMsg = (ChatMessage)msg;
+                System.out.println("Received chat message from " + cMsg.getSource() + ": " + cMsg.getMessage());
+
+                gp.receive(msg);
             }
         }
     }
@@ -142,10 +151,6 @@ public class NetworkThread extends Thread {
         } catch (IOException e) {
             System.out.println("IOException: NetworkThread->send");
         }
-    }
-
-    public void setGp(GamePanel gp) {
-        this.gp = gp;
     }
 
     public void disconnect() {

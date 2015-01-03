@@ -1,5 +1,6 @@
 package derouinw.snowball.client.Game;
 
+import derouinw.snowball.client.ChatPanel;
 import derouinw.snowball.client.ClientFrame;
 import derouinw.snowball.client.Item.InventoryListener;
 import derouinw.snowball.client.Item.InventoryPanel;
@@ -7,10 +8,7 @@ import derouinw.snowball.client.Item.Item;
 import derouinw.snowball.client.Map.Map;
 import derouinw.snowball.client.Map.MapTile;
 import derouinw.snowball.client.NetworkThread;
-import derouinw.snowball.server.Message.DisconnectMessage;
-import derouinw.snowball.server.Message.MapDataMessage;
-import derouinw.snowball.server.Message.Message;
-import derouinw.snowball.server.Message.PlayerDataMessage;
+import derouinw.snowball.server.Message.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +28,9 @@ public class GamePanel extends JPanel implements KeyListener {
 
     private Map m;
     private InventoryPanel ip;
+    private ChatPanel cp;
 
-    public GamePanel(ClientFrame cf, NetworkThread nt) {
+    public GamePanel(ClientFrame cf, NetworkThread nt, ChatPanel cp) {
         super();
         setPreferredSize(new Dimension(500, 500));
         addKeyListener(this);
@@ -39,6 +38,7 @@ public class GamePanel extends JPanel implements KeyListener {
 
         this.cf = cf;
         this.nt = nt;
+        this.cp = cp;
 
         p = new Player();
         p.addChangeListener(new PlayerListener(this));
@@ -96,6 +96,10 @@ public class GamePanel extends JPanel implements KeyListener {
             loadMap(mdMsg.getMap());
             revalidate();
             repaint();
+        } else if (msg instanceof ChatMessage) {
+            ChatMessage cMsg = (ChatMessage)msg;
+
+            cp.addMessage(cMsg);
         }
     }
 

@@ -100,6 +100,8 @@ public class ServerThread extends Thread {
             }
         } else if (msg instanceof ConnectMessage) {
             getPlayerThread(source).setRoom(rooms.get(0));
+        } else if (msg instanceof ChatMessage) {
+            broadcast(msg);
         }
     }
 }

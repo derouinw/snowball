@@ -16,6 +16,8 @@ public class Room {
     public Room(Map m, ServerThread st) {
         this.m = m;
         this.st = st;
+
+        playerThreads = new ArrayList<PlayerThread>();
     }
 
     public void addPlayerThread(PlayerThread pt) {

@@ -23,6 +23,7 @@ public class ClientFrame extends JFrame implements KeyListener {
 
     private NetworkThread nt;
     private GamePanel gp;
+    private ChatPanel cp;
 
     private JPanel actionsPanel;
     private JButton inventoryButton;
@@ -73,7 +74,8 @@ public class ClientFrame extends JFrame implements KeyListener {
         inventoryButton = new JButton("Show Inventory");
         inventoryButton.setFocusable(false);
         nt = new NetworkThread(ClientFrame.this, gp);
-        gp = new GamePanel(ClientFrame.this, nt);
+        cp = new ChatPanel(nt);
+        gp = new GamePanel(ClientFrame.this, nt, cp);
         inventoryPanel = new InventoryPanel(gp);
         inventoryButton.addActionListener(new ActionListener() {
             @Override
@@ -109,6 +111,7 @@ public class ClientFrame extends JFrame implements KeyListener {
         if (status.equals("Connected")) {
             add(gp, BorderLayout.CENTER);
             add(actionsPanel, BorderLayout.EAST);
+            add(cp, BorderLayout.SOUTH);
             ipField.setVisible(false);
             userField.setVisible(false);
             connectButton.setVisible(false);
@@ -116,6 +119,7 @@ public class ClientFrame extends JFrame implements KeyListener {
         } else if (status.equals("Disconnected")) {
             remove(gp);
             remove(actionsPanel);
+            remove(cp);
             ipField.setVisible(true);
             ipField.setEnabled(true);
             userField.setVisible(true);

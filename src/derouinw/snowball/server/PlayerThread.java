@@ -97,6 +97,11 @@ public class PlayerThread extends Thread {
             } else if (msg instanceof UsernameMessage) {
                 UsernameMessage uMsg = (UsernameMessage)msg;
                 name = uMsg.getUsername();
+            } else if (msg instanceof ChatMessage) {
+                ChatMessage cMsg = (ChatMessage)msg;
+                System.out.println("Received chat message from " + cMsg.getSource() + ": " + cMsg.getMessage());
+
+                st.receive(msg, name);
             }
         }
     }
