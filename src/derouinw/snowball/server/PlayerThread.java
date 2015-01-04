@@ -23,6 +23,8 @@ public class PlayerThread extends Thread {
 
     private Room room;
 
+    private boolean isAdmin = false;
+
     // player data
     String name = "";
     int x = 0, y = 0;
@@ -46,8 +48,12 @@ public class PlayerThread extends Thread {
         start();
     }
 
+    public boolean isAdmin() { return isAdmin; }
     public int getNum() { return ptNum; }
-    public void setRoom(Room room) { this.room = room; }
+    public void setRoom(Room room) {
+        this.room = room;
+        room.addPlayerThread(this);
+    }
 
     public boolean send(Message message) {
         try {
@@ -97,6 +103,9 @@ public class PlayerThread extends Thread {
             } else if (msg instanceof UsernameMessage) {
                 UsernameMessage uMsg = (UsernameMessage)msg;
                 name = uMsg.getUsername();
+                if (name.equals("admin")) {
+                    isAdmin = true;
+                }
             } else if (msg instanceof ChatMessage) {
                 ChatMessage cMsg = (ChatMessage)msg;
                 System.out.println("Received chat message from " + cMsg.getSource() + ": " + cMsg.getMessage());

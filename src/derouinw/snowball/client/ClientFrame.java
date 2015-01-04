@@ -76,6 +76,7 @@ public class ClientFrame extends JFrame implements KeyListener {
         nt = new NetworkThread(ClientFrame.this, gp);
         cp = new ChatPanel(nt);
         gp = new GamePanel(ClientFrame.this, nt, cp);
+        cp.setGamePanel(gp);
         inventoryPanel = new InventoryPanel(gp);
         inventoryButton.addActionListener(new ActionListener() {
             @Override

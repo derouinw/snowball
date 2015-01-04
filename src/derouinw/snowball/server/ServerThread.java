@@ -26,17 +26,26 @@ public class ServerThread extends Thread {
             FileInputStream fis = new FileInputStream(filename);
             ObjectInputStream in = new ObjectInputStream(fis);
             m = (Map)in.readObject();
+            rooms.add(new Room(m, this));
+
+            fis = new FileInputStream(Map.MAPS_DIR + "hi.map");
+            in = new ObjectInputStream(fis);
+            m = (Map)in.readObject();
+            rooms.add(new Room(m, this));
+
             in.close();
             fis.close();
         } catch (IOException ioe) {
             System.out.println("IOException in ServerThread->ServerThread");
             m = new Map();
+
+            rooms.add(new Room(m, this));
         } catch (ClassNotFoundException e) {
             System.out.println("ClassNotFoundException in ServerThread->ServerThread");
             m = new Map();
-        }
 
-        rooms.add(new Room(m, this));
+            rooms.add(new Room(m, this));
+        }
     }
 
     protected synchronized Map getMap() { return m; }
@@ -101,7 +110,30 @@ public class ServerThread extends Thread {
         } else if (msg instanceof ConnectMessage) {
             getPlayerThread(source).setRoom(rooms.get(0));
         } else if (msg instanceof ChatMessage) {
-            broadcast(msg);
+            ChatMessage cMsg = (ChatMessage)msg;
+
+            if (cMsg.getMessage().startsWith("/")) {
+                // admin command
+                if (getPlayerThread(cMsg.getSource()).isAdmin()) {
+                    adminCommand(cMsg.getMessage().substring(1), cMsg.getSource());
+                }
+            } else {
+                broadcast(msg);
+            }
+        }
+    }
+
+    private void adminCommand(String text, String source) {
+        int space = text.indexOf(" ");
+        String command = text.substring(0,space).trim();
+        String contents = text.substring(space+1).trim();
+
+        if (command.equals("setroom")) {
+            int index = Integer.valueOf(contents);
+            if (index < rooms.size()) {
+                System.out.println("Setting room for " + source + " to room: " + index);
+                getPlayerThread(source).setRoom(rooms.get(Integer.valueOf(contents)));
+            }
         }
     }
 }

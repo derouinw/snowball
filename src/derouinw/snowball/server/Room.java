@@ -22,6 +22,7 @@ public class Room {
 
     public void addPlayerThread(PlayerThread pt) {
         playerThreads.add(pt);
+        pt.send(new MapDataMessage(m));
     }
 
     public void removePlayerThread(PlayerThread pt) {
